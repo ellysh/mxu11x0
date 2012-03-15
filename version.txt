@@ -1,0 +1,78 @@
+Vrsion Number:	Ver1.2.3
+Product Line:	MOXA UPort 1100 Series 
+Platform:    	Linux kernel 2.6.5 & above, x86 & x64.
+Company:	Moxa Inc.
+Date:		02/01/2010	
+
+Support Product:
+===============
+UPort 1110/1130/1130I/1150/1150I
+
+Tested Linux: 
+=============
+Kernel 2.6.32
+Kernel 2.6.30.1
+Kernel 2.6.30
+Kernel 2.6.29
+Fedora Core 10                  (2.6.27)
+Kernel 2.6.26
+Fedora Core 7			(2.6.21)
+Fedora Core 6		        (2.6.18)
+Fedora Core 5 		        (2.6.17.4)
+Fedora Core 5 		        (2.6.15)
+Fedora Core 4 		        (2.6.11)
+Fedora Core 3 		        (2.6.9)
+Fedora Core 2 		        (2.6.5)
+
+SuSE Linux 10.3			(2.6.22)
+SuSE Linux 10.1 	        (2.6.16)
+SuSE Linux 10		        (2.6.13)
+SuSE Linux 9.2		        (2.6.8)
+
+Ubuntu 7.10			(2.6.22)
+Ubuntu 6.0.6 		        (2.6.15)
+
+Debian 4.0			(2.6.18)
+Debian 3.1	            	(2.6.8)
+
+Mandrake 2006		        (2.6.12)
+Red Hat Enterprise Linux AS 4	(2.6.9)
+
+Release Note:
+==============
+Ver1.2.3
+1. Support kernel upto 2.6.32
+2. Modify "mxu1_open" and "mxu1_close" function prototype.
+3. Fix bug of DTR signal while setting baudrate to B0.
+
+Ver1.2.1
+1. Support kernel upto 2.6.30.1
+
+Ver1.2 
+1. Add a new model UPort 1130I.
+2. Support kernel upto 2.6.29
+
+Ver1.1.9
+1. Fix bug of compiling fail on Kernel 2.6.24
+
+Ver1.1.7
+1. Support kernel upto 2.6.27
+
+Ver1.1.5
+1. Support kernel upto 2.6.26
+
+Ver1.1.3
+1. Fix bug of compiling fail on FC 2 2.6.5 
+
+Ver1.1.1
+1. Fix bug of installing driver with error -5 on 2.6.24.
+2. Support kernel upto 2.6.24.
+
+Ver1.1
+1. Add two new models UPort 1150, UPort 1150I.
+2. Add static driver installation guide to the readme.txt.
+
+Ver1.0
+1. Official released.
+
+-End-
