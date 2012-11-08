@@ -1,0 +1,1 @@
+KERNEL=="ttyUSB*", MODE="0666"
