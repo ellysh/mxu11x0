@@ -1,9 +1,9 @@
 =============================================================================
           MOXA UPort 11x0 USB to Serial Hub Family Driver Installation Guide
 		    	   for Linux Kernel 2.6.x
-	       Copyright (C) 2007, Moxa Inc.
+	       Copyright (C) 2012, Moxa Inc.
 =============================================================================
-Date: 03/23/2009
+Date: 07/13/2012
 
 CONTENTS
 
@@ -46,7 +46,7 @@ CONTENTS
    order to maintain compatibility, this version has also been properly 
    tested with several Linux distribution (see version.txt). However, 
    if compatibility problem occurs, please contact Moxa Technologies
-   technical support. (support@moxa.com.tw)
+   technical support. (support@moxa.com)
 
    All the drivers are published in form of source code under
    GNU General Public License in this version. Please refer to GNU General
@@ -76,22 +76,22 @@ CONTENTS
 
        The driver file may be obtained from CD-ROM or floppy disk.
        The first step, is to copy driver file
-       "driv_linux2.6_uport1p_v1.2_build_xx.tgz" into specified
+       "driv_linux_uport1p_v1.x_build_xx.tgz" into specified
        directory. e.g. /moxa. The execute commands as below.
 
        # cd / 
        # mkdir moxa 		
        # cd /moxa
-       # cp /dev/fd0/driv_linux2.6_uport1p_v1.2_build_xx.tgz
-       # tar xvfz driv_linux2.6_uport1p_v1.2_build_xx.tgz
+       # cp /dev/fd0/driv_linux_uport1p_v1.x_build_xx.tgz
+       # tar xvfz driv_linux_uport1p_v1.x_build_xx.tgz
        
        or
        
        # cd /
        # mkdir moxa
        # cd /moxa
-       # cp /mnt/cdrom/<driver directory>/driv_linux2.6_uport1p_v1.2_build_xx.tgz
-       # tar xvfz driv_linux2.6_uport1p_v1.2_build_xx.tgz
+       # cp /mnt/cdrom/<driver directory>/driv_linux_uport1p_v1.x_build_xx.tgz
+       # tar xvfz driv_linux_uport1p_v1.x_build_xx.tgz
 
    3.2 Device naming convention
    
@@ -197,7 +197,9 @@ CONTENTS
 
    3.5 Verify driver installation
        You may refer to /var/log/messages to check the latest status
-       log reported by this driver whenever it's activated.
+       log reported by this driver whenever it's activated or type command
+       "dmesg" to get driver information.
+       
        
 -----------------------------------------------------------------------------
 4. Setserial

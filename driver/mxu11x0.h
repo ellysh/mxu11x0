@@ -19,7 +19,10 @@
 #define _MXU11X0_H_
 
 #undef dbg
-#define dbg(format, arg...) do { if (debug) printk(KERN_DEBUG "%s: " format "\n" , __FILE__ , ## arg); } while (0)
+#define dbg(format, arg...) while (0)
+//#define dbg(format, arg...) do { if (debug) printk(KERN_DEBUG "%s: " format "\n" , __FILE__ , ## arg); } while (0)
+//#define dbg(format, args...) printk(KERN_DEBUG "%s: " format "\n", __FILE__, args)
+//#define dbg(format, args...) printk(KERN_DEBUG "(%04d-%s)" format "\n", __LINE__, __FUNCTION__, args)
 
 /* Configuration ids */
 #define MXU1_BOOT_CONFIG			1

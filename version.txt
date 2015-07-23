@@ -1,8 +1,8 @@
-Vrsion Number:	Ver1.2.3
+Vrsion Number:	Ver1.3.11
 Product Line:	MOXA UPort 1100 Series 
-Platform:    	Linux kernel 2.6.5 & above, x86 & x64.
+Platform:    	Linux kernel 2.6.x & above, x86 & x64.
 Company:	Moxa Inc.
-Date:		02/01/2010	
+Date:		12/16/2014
 
 Support Product:
 ===============
@@ -10,6 +10,9 @@ UPort 1110/1130/1130I/1150/1150I
 
 Tested Linux: 
 =============
+Kernel 3.5.3
+Kernel 3.4.4
+Kernel 3.1.9
 Kernel 2.6.32
 Kernel 2.6.30.1
 Kernel 2.6.30
@@ -40,33 +43,36 @@ Red Hat Enterprise Linux AS 4	(2.6.9)
 
 Release Note:
 ==============
-Ver1.2.3
-1. Support kernel upto 2.6.32
-2. Modify "mxu1_open" and "mxu1_close" function prototype.
-3. Fix bug of DTR signal while setting baudrate to B0.
+Ver1.3.11
+1. Bugfix: Second UPort will not be installed properly in kernel 3.11.
 
-Ver1.2.1
-1. Support kernel upto 2.6.30.1
+Ver1.3.9
+1. Improve: Support kernel 3.11.3
+
+Ver1.3.7
+1. Improve: Support kernel 3.9.4.
+
+Ver1.3.5
+1. Improve: Support kernel 3.8.0.
+
+Ver1.3.3
+1. Support kernel upto 3.5.3
+
+Ver1.3.1
+1. Fix the compile error at Kernel 2.6.18
+
+Ver1.3
+1. Support kernel upto 3.4.4
+2. Modify "mxu1_open" and "mxu1_close" function prototype.
+3. Modify "mxu1_ioctl", "mxu1_tiocmget" and "mxu1_tiocmset" function prototype
+4. Fix bug of DTR signal while setting baudrate to B0.
 
 Ver1.2 
 1. Add a new model UPort 1130I.
 2. Support kernel upto 2.6.29
-
-Ver1.1.9
-1. Fix bug of compiling fail on Kernel 2.6.24
-
-Ver1.1.7
-1. Support kernel upto 2.6.27
-
-Ver1.1.5
-1. Support kernel upto 2.6.26
-
-Ver1.1.3
-1. Fix bug of compiling fail on FC 2 2.6.5 
-
-Ver1.1.1
-1. Fix bug of installing driver with error -5 on 2.6.24.
-2. Support kernel upto 2.6.24.
+3. Fix bug of compiling fail on Kernel 2.6.24
+4. Fix bug of compiling fail on FC 2 2.6.5 
+5. Fix bug of installing driver with error -5 on 2.6.24.
 
 Ver1.1
 1. Add two new models UPort 1150, UPort 1150I.
