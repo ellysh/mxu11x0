@@ -36,7 +36,7 @@
 #include <linux/uaccess.h>
 #include <linux/semaphore.h>
 #endif
-#if(LINUX_VERSION_CODE > KERNEL_VERSION(4,11,0))
+#if(LINUX_VERSION_CODE >= KERNEL_VERSION(4,11,0))
 #include <linux/sched/signal.h>
 #endif
 
