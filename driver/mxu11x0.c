@@ -16,7 +16,7 @@
  * 
  */
 
-#include <linux/version.h>
+#include <generated/uapi/linux/version.h>
 #include <linux/kernel.h>
 #include <linux/errno.h>
 #include <linux/init.h>
@@ -26,7 +26,7 @@
 #include <linux/tty_flip.h>
 #include <linux/module.h>
 #include <linux/spinlock.h>
-#include <linux/ioctl.h>
+#include <uapi/linux/ioctl.h>
 #include <linux/serial.h>
 #include <linux/circ_buf.h>
 #if(LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27))
@@ -36,17 +36,12 @@
 #include <linux/uaccess.h>
 #include <linux/semaphore.h>
 #endif
-#if(LINUX_VERSION_CODE >= KERNEL_VERSION(4,11,0))
-#include <linux/sched/signal.h>
-#endif
 
 #include <linux/usb.h>
 
-#if(LINUX_VERSION_CODE < KERNEL_VERSION(2,6,18))
-#include "usb-serial.h"
-#else
 #include <linux/usb/serial.h>
-#endif
+
+#include <uapi/asm-generic/termbits.h>
 #include "mxu11x0.h"
 #include "mxu1110_fw.h"
 #include "mxu1130_fw.h"
@@ -57,7 +52,7 @@
 
 /* Defines */
 
-#define MXU1_DRIVER_VERSION	"1.3.11"
+#define MXU1_DRIVER_VERSION	"1.3.0"
 #define MXU1_DRIVER_AUTHOR	"Ken Huang"
 #define MXU1_DRIVER_DESC	"MOXA UPort 11x0 USB to Serial Hub Driver"
 
@@ -261,12 +256,16 @@ static int mxu1_buf_put(struct mxu1_port *mxport, const char *buf, int count);
 static int mxu1_buf_get(struct circ_buf *cb, char *buf, int count);
 
 
+extern void usb_serial_disconnect(struct usb_interface *interface);
+extern int usb_serial_probe(struct usb_interface *interface, const struct usb_device_id *id);
+extern int tty_buffer_request_room(struct tty_port *port, size_t size);
+extern int tty_insert_flip_string(struct tty_port *port, const unsigned char *chars, size_t size);
+extern void tty_flip_buffer_push(struct tty_port *port);
 /* Data */
 
 /* module parameters */
-#if(LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0))
 static int debug;
-#endif
+
 /* supported devices */
 
 static struct usb_device_id mxu1_id_table[] = {
@@ -303,7 +302,6 @@ static struct usb_device_id mxu1131_id_table[] = {
 	{ }
 };
 
-#if(LINUX_VERSION_CODE < KERNEL_VERSION(3,5,0))
 static struct usb_driver mxu1_usb_driver = {
 #if(LINUX_VERSION_CODE < KERNEL_VERSION(2,6,15))
 	.owner			= THIS_MODULE,
@@ -317,7 +315,6 @@ static struct usb_driver mxu1_usb_driver = {
 	.no_dynamic_id = 1,
 #endif
 };
-#endif
 
 #if(LINUX_VERSION_CODE > KERNEL_VERSION(2,6,13))
 static struct usb_serial_driver mxu1110_1port_device = {
@@ -656,11 +653,8 @@ static void __exit mxu1_exit(void)
 static int __init mxu1_init(void)
 {
 	int ret;
-#if(LINUX_VERSION_CODE < KERNEL_VERSION(3,5,0))	
-	ret = usb_serial_register_drivers(&mxu1_usb_driver, serial_drivers);
-#else
-	ret = usb_serial_register_drivers(serial_drivers, KBUILD_MODNAME, mxu1_id_table);
-#endif
+	
+	ret = usb_serial_register_drivers(serial_drivers, mxu1_usb_driver.name, mxu1_usb_driver.id_table);
 	
 	if(ret == 0)
 		printk(KERN_INFO KBUILD_MODNAME ": " MXU1_DRIVER_VERSION ":"
@@ -671,11 +665,7 @@ static int __init mxu1_init(void)
 
 static void __exit mxu1_exit(void)
 {
-#if(LINUX_VERSION_CODE < KERNEL_VERSION(3,5,0))	
-	usb_serial_deregister_drivers(&mxu1_usb_driver, serial_drivers);
-#else
 	usb_serial_deregister_drivers(serial_drivers);
-#endif	
 }
 #endif
 
@@ -904,8 +894,7 @@ static int mxu1_open(struct tty_struct *tty, struct usb_serial_port *port, struc
 			     MXU1_PIPE_TIMEOUT_ENABLE | 
 			     (MXU1_TRANSFER_TIMEOUT << 2));
 
-	//dbg("%s - port %d", __FUNCTION__, port->number);
-	dbg("%s", "<< IN >>");
+	dbg("%s - port %d", __FUNCTION__, port->port_number);
 
 	if (mxport == NULL)
 		return -ENODEV;
@@ -920,17 +909,13 @@ static int mxu1_open(struct tty_struct *tty, struct usb_serial_port *port, struc
 	if (port->tty)
 		port->tty->low_latency = MXU1_DEFAULT_LOW_LATENCY;
 #else
-//	if (port->port.tty)
-//		port->port.tty->low_latency = MXU1_DEFAULT_LOW_LATENCY;
+	if (port->port.tty)
+		port->port.tty->port->low_latency = MXU1_DEFAULT_LOW_LATENCY;
 #endif	
+		
 
-	dbg("port_number: %d, port->minor: %d", port->port_number, port->minor);
-
-#if(LINUX_VERSION_CODE > KERNEL_VERSION(3,10,0))
 	port_number = port->port_number;
-#else
-	port_number = port->number - port->serial->minor;
-#endif
+
 	memset(&(mxport->mxp_icount), 0x00, sizeof(mxport->mxp_icount));
 
 	mxport->mxp_msr = 0;
@@ -1050,8 +1035,7 @@ unlink_int_urb:
 	}
 up_sem:
 	up(&mxdev->mxd_open_close_sem);
-	//dbg("%s - exit %d", __FUNCTION__, status);
-	dbg("<< OUT %d >>", status);
+	dbg("%s - exit %d", __FUNCTION__, status);
 	return status;
 }
 
@@ -1069,7 +1053,7 @@ static void mxu1_close(struct tty_struct *tty, struct usb_serial_port *port, str
 	int status = 0;
 	int do_up;
 
-	//dbg("%s - port %d", __FUNCTION__, port->number);
+	dbg("%s - port %d", __FUNCTION__, port->port_number);
 			 
 	mxdev = usb_get_serial_data(port->serial);
 	mxport = usb_get_serial_port_data(port);
@@ -1090,11 +1074,7 @@ static void mxu1_close(struct tty_struct *tty, struct usb_serial_port *port, str
 	
 	mxport->mxp_write_urb_in_use = 0;
 
-#if(LINUX_VERSION_CODE > KERNEL_VERSION(3,10,0))
 	port_number = port->port_number;
-#else
-	port_number = port->number - port->serial->minor;
-#endif
 
 	dbg("%s - sending MXU1_CLOSE_PORT", __FUNCTION__);
 	status = mxu1_command_out_sync(mxdev, MXU1_CLOSE_PORT,
@@ -1437,34 +1417,19 @@ static void mxu1_set_termios(struct tty_struct *tty1, struct usb_serial_port *po
 	tcflag_t cflag,iflag;
 	int baud;
 	int status = 0;
-	int port_number;
+	int port_number = port->port_number;
 	unsigned int mcr;
 
-	dbg("%s", "<< IN >>");
+	dbg("%s - port %d", __FUNCTION__, port->port_number);
 
-#if(LINUX_VERSION_CODE > KERNEL_VERSION(3,10,0))
-	port_number = port->port_number;
-#else
-	port_number = port->number - port->serial->minor;
-#endif
-
-	dbg("port_number %d, port %d, minor %d", port_number, port->port_number, port->minor);
-
-#if(LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0))
-	if (!tty || !tty->termios) {
-#else
 	if (!tty) {
-#endif
-		dbg("%s - no tty or termios", __FUNCTION__);
+		dbg("%s - no tty", __FUNCTION__);
 		return;
 	}
-#if(LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0))
-	cflag = tty->termios->c_cflag;
-	iflag = tty->termios->c_iflag;
-#else
+
 	cflag = tty->termios.c_cflag;
 	iflag = tty->termios.c_iflag;
-#endif
+
 	if (old_termios && cflag == old_termios->c_cflag
 	&& iflag == old_termios->c_iflag) {
 		dbg("%s - nothing to change", __FUNCTION__);
@@ -1572,22 +1537,19 @@ static void mxu1_set_termios(struct tty_struct *tty1, struct usb_serial_port *po
 	if ((cflag & CBAUD) == B0) {
 
 		mcr &= ~(MXU1_MCR_DTR | MXU1_MCR_RTS);
-		mxport->mxp_set_B0 = 1;
+		mxport->mxp_set_B0 = true;
 	}
 	else {
 		if(mxport->mxp_set_B0)
 			mcr |= MXU1_MCR_DTR;
 		
-		mxport->mxp_set_B0 = 0;
+		mxport->mxp_set_B0 = false;
 	}
 
 	status = mxu1_set_mcr(mxport, mcr);
 
 	if (status)
 		dev_err(&port->dev, "%s - cannot set modem control on port %d, %d\n", __FUNCTION__, port_number, status);
-
-	dbg("%s", "<< OUT >>");
-
 
 	kfree(config);
 }
@@ -1838,17 +1800,6 @@ static void mxu1_bulk_in_callback(struct urb *urb)
 #else
 	if (port->port.tty && urb->actual_length) {
 #endif
-		
-#if(LINUX_VERSION_CODE < KERNEL_VERSION(2,6,9))		
-		usb_serial_debug_data(dev->driver->name, __FUNCTION__,
-			urb->actual_length, urb->transfer_buffer);
-#elif(LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0))
-		usb_serial_debug_data(debug, dev, __FUNCTION__,
-			urb->actual_length, urb->transfer_buffer);
-#else
-		usb_serial_debug_data(dev, __FUNCTION__,
-			urb->actual_length, urb->transfer_buffer);
-#endif
 
 		if (!mxport->mxp_is_open)
 			dbg("%s - port closed, dropping data", __FUNCTION__);
@@ -1926,9 +1877,6 @@ static void mxu1_recv(struct mxu1_port *mxport,
 {
 	int cnt;
 	struct tty_struct *tty;
-#if(LINUX_VERSION_CODE > KERNEL_VERSION(3,10,0))
-	struct tty_port *tty_port = &mxport->mxp_port->port;
-#endif
 #if(LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27))
 	tty = mxport->mxp_port->tty;
 #else
@@ -1942,11 +1890,8 @@ static void mxu1_recv(struct mxu1_port *mxport,
             		break;
         	}
 		
-#if(LINUX_VERSION_CODE > KERNEL_VERSION(3,10,0))
-		cnt = tty_buffer_request_room(tty_port, length);
-#else
-		cnt = tty_buffer_request_room(tty, length);
-#endif
+		cnt = tty_buffer_request_room(tty->port, length);
+
 	        if(cnt < length){
 		            dbg("%s - [2] dropping data, %d bytes lost\n", __FUNCTION__, length);			    
 		            break;            
@@ -1954,18 +1899,12 @@ static void mxu1_recv(struct mxu1_port *mxport,
 
 		cnt = length;
 
-#if(LINUX_VERSION_CODE > KERNEL_VERSION(3,10,0))
-		tty_insert_flip_string(tty_port, data, cnt);
-#else
-		tty_insert_flip_string(tty, data, cnt);
-#endif
+		tty_insert_flip_string(tty->port, data, cnt);
+
 		length -= cnt;
 
-#if(LINUX_VERSION_CODE > KERNEL_VERSION(3,10,0))
-		tty_flip_buffer_push(tty_port);
-#else
-		tty_flip_buffer_push(tty);
-#endif
+		tty_flip_buffer_push(tty->port);
+
 	}while(length > 0);
 
 }
@@ -2089,13 +2028,7 @@ static void mxu1_send(struct mxu1_port *mxport)
 	mxport->mxp_write_urb_in_use = 1;
 
 	spin_unlock_irqrestore(&mxport->mxp_lock, flags);
-#if(LINUX_VERSION_CODE < KERNEL_VERSION(2,6,9))
-	usb_serial_debug_data(&port->number, __FUNCTION__, count, port->write_urb->transfer_buffer);
-#elif(LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0))
-	usb_serial_debug_data(debug, &port->dev, __FUNCTION__, count, port->write_urb->transfer_buffer);
-#else
-	usb_serial_debug_data(&port->dev, __FUNCTION__, count, port->write_urb->transfer_buffer);
-#endif
+
 	
 	usb_fill_bulk_urb(port->write_urb, port->serial->dev,
 			   usb_sndbulkpipe(port->serial->dev,
@@ -2150,11 +2083,7 @@ static int mxu1_get_lsr(struct mxu1_port *mxport)
 	int size,status;
 	struct mxu1_device *mxdev = mxport->mxp_mxdev;
 	struct usb_serial_port *port = mxport->mxp_port;
-#if(LINUX_VERSION_CODE > KERNEL_VERSION(3,10,0))
 	int port_number = port->port_number;
-#else
-	int port_number = port->number - port->serial->minor;
-#endif
 	struct mxu1_port_status *data;
 
 	dbg("%s - port %d", __FUNCTION__, port->port_number);
@@ -2195,11 +2124,7 @@ static int mxu1_get_serial_info(struct mxu1_port *mxport,
 	memset(&ret_serial, 0, sizeof(ret_serial));
 
 	ret_serial.type = PORT_16550A;
-#if(LINUX_VERSION_CODE > KERNEL_VERSION(3,10,0))
 	ret_serial.line = port->minor;
-#else
-	ret_serial.line = port->serial->minor;
-#endif
 	ret_serial.port = mxport->mxp_user_get_uart_mode;
 	ret_serial.flags = mxport->mxp_flags;
 	ret_serial.xmit_fifo_size = MXU1_WRITE_BUF_SIZE;
